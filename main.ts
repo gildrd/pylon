@@ -53,3 +53,26 @@ commands.raw(
     }
   }
 );
+
+commands.raw(
+  { name: 'roll', filters: discord.command.filters.canSpeak() },
+  async (message) => {
+    let number = (Math.floor(Math.random() * 20) + 1).toString();
+
+    message.reply(number);
+    return;
+  }
+);
+
+commands.raw(
+  { name: 'pileface', filters: discord.command.filters.canSpeak() },
+  async (message) => {
+    let number = Math.floor(Math.random() * 2) + 1;
+    if (number === 1) {
+      message.reply('pile');
+    } else {
+      message.reply('face');
+    }
+    return;
+  }
+);
