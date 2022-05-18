@@ -2,6 +2,11 @@ const commands = new discord.command.CommandGroup({
   defaultPrefix: '!' // You can customize your default prefix here.
 });
 
+
+/******************************************************
+ *      Petits jeux de hazard pour se faire la main   *
+*******************************************************/
+
 commands.raw(
   { name: 'action', filters: discord.command.filters.canSpeak() },
   async (message) => {
@@ -76,3 +81,30 @@ commands.raw(
     return;
   }
 );
+
+/******************************************************
+ *      Ajout de rôles et supression par cron        *
+*******************************************************/
+const greetings = ['yo', 'hey'];
+const roleID = '';
+const channelID = '';
+const guildID = '';
+
+discord.on('MESSAGE_CREATE', async (message) => {
+  if (message.channelId == channelID) {
+    if (greetings.includes(message.content.toLowerCase())) {
+      await message.addReaction(discord.decor.Emojis.WAVE);
+
+      message.member.addRole(roleID);
+    }
+  }
+});
+
+pylon.tasks.cron('remove_peut_rp_role', '0 0 3 * * * *', async () => {
+  const guildPromise = discord.getGuild(guildID);
+  guildPromise.then(async (guild) => {
+    for await (const member of guild.iterMembers()) {
+      await member.removeRole(roleID);
+    }
+  });
+});
