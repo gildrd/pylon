@@ -92,10 +92,12 @@ const guildID = '';
 
 discord.on('MESSAGE_CREATE', async (message) => {
   if (message.channelId == channelID) {
-    if (greetings.includes(message.content.toLowerCase())) {
-      await message.addReaction(discord.decor.Emojis.WAVE);
+    for (let greeting of greetings) {
+      if (message.content.toLowerCase().includes(greeting)) {
+        await message.addReaction(discord.decor.Emojis.WAVE);
 
-      message.member.addRole(roleID);
+        message.member.addRole(roleID);
+      }
     }
   }
 });
