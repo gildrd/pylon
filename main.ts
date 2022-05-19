@@ -90,6 +90,8 @@ const roleID = '';
 const channelID = '';
 const guildID = '';
 
+const simpleKvn = new pylon.KVNamespace('myKvn');
+
 discord.on('MESSAGE_CREATE', async (message) => {
   if (message.channelId == channelID) {
     for (let greeting of greetings) {
@@ -97,16 +99,31 @@ discord.on('MESSAGE_CREATE', async (message) => {
         await message.addReaction(discord.decor.Emojis.WAVE);
 
         message.member.addRole(roleID);
+        
+        simpleKvn.put(message.member.user.id, JSON.stringify(message.member), {
+          ifNotExists: true,
+        });
       }
     }
   }
 });
 
-pylon.tasks.cron('remove_peut_rp_role', '0 0 3 * * * *', async () => {
-  const guildPromise = discord.getGuild(guildID);
-  guildPromise.then(async (guild) => {
-    for await (const member of guild.iterMembers()) {
-      await member.removeRole(roleID);
+pylon.tasks.cron('remove_peut_rp_role', '0 0 1 * * * *', async () => {
+  const itemsPromise = simpleKvn.items();
+  itemsPromise.then((items) => {
+    for (let item of items) {
+      const member = JSON.parse(item.value);
+
+      const guildPromise = discord.getGuild(guildID);
+      guildPromise.then((guild) => {
+        const memberPromise = guild.getMember(member.user.id);
+
+        memberPromise.then((member) => {
+          member.removeRole(roleID);
+          
+          simpleKvn.delete(item.key);
+        });
+      });
     }
   });
 });
