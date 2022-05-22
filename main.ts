@@ -89,23 +89,32 @@ const greetings = ['yo', 'hey'];
 const roleID = '';
 const channelID = '';
 const guildID = '';
+const prerequisiteRoleID = '';
 
 const simpleKvn = new pylon.KVNamespace('myKvn');
 
 discord.on('MESSAGE_CREATE', async (message) => {
-  if (message.channelId == channelID) {
-    for (let greeting of greetings) {
-      if (message.content.toLowerCase().includes(greeting)) {
-        await message.addReaction(discord.decor.Emojis.WAVE);
+  const userId = message.member.user.id;
 
-        message.member.addRole(roleID);
-        
-        simpleKvn.put(message.member.user.id, JSON.stringify(message.member), {
-          ifNotExists: true,
-        });
+  if (message.channelId == channelID) {
+    const keysPromise = simpleKvn.get<string>(userId);
+    keysPromise.then((keys) => {
+      if (!keys) {
+        for (let greeting of greetings) {
+          if (message.content.toLowerCase().includes(greeting)) {
+            if (message.member.roles.includes(prerequisiteRoleID)) {
+              message.addReaction(discord.decor.Emojis.WAVE);
+              
+              message.member.addRole(roleID);
+              
+              simpleKvn.put(userId, JSON.stringify(message.member), {
+                ifNotExists: true,
+              });
+            }
+          }
+        }
       }
-    }
-  }
+    });
 });
 
 pylon.tasks.cron('remove_peut_rp_role', '0 0 1 * * * *', async () => {
