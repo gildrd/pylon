@@ -93,6 +93,28 @@ const prerequisiteRoleID = '';
 
 const simpleKvn = new pylon.KVNamespace('myKvn');
 
+function isWordInString(word: string, message: string): boolean {
+  const regStart = new RegExp('^ *' + word + ' +');
+  const regContent = new RegExp(' +' + word + ' +');
+  const regEnd = new RegExp(' +' + word + '$');
+  const regOnly = new RegExp('^' + word + '$');
+
+  if (regStart.test(message)) {
+    return true;
+  }
+  if (regContent.test(message)) {
+    return true;
+  }
+  if (regEnd.test(message)) {
+    return true;
+  }
+  if (regOnly.test(message)) {
+    return true;
+  }
+
+  return false;
+}
+
 discord.on('MESSAGE_CREATE', async (message) => {
   const userId = message.member.user.id;
 
@@ -101,7 +123,7 @@ discord.on('MESSAGE_CREATE', async (message) => {
     keysPromise.then((keys) => {
       if (!keys) {
         for (let greeting of greetings) {
-          if (message.content.toLowerCase().includes(greeting)) {
+          if (isWordInString(greeting, message.content.toLowerCase())) {
             if (message.member.roles.includes(prerequisiteRoleID)) {
               message.addReaction(discord.decor.Emojis.WAVE);
               
